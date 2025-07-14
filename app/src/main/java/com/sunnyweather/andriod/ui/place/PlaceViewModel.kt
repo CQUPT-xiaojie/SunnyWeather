@@ -31,7 +31,9 @@ class PlaceViewModel: ViewModel() {
 
     fun clearPlace() = Repository.clearPlace()
 
-    fun setHome(place: Place) = Repository.setHome(place)
+    fun setHome(placeAddress: String) = Repository.setHome(placeAddress)
+
+    fun getHome() = Repository.getHome()
 
     fun getSavedPlace(placeAddress: String) = Repository.getSavedPlace(placeAddress)
 

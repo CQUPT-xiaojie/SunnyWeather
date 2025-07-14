@@ -78,7 +78,9 @@ object Repository {
 
     fun clearPlace() = PlaceDao.clearPlace()
 
-    fun setHome(place: Place) = PlaceDao.setHome(place)
+    fun setHome(placeAddress: String) = PlaceDao.setHome(placeAddress)
+
+    fun getHome() = PlaceDao.getHome()
 
     fun getSavedPlace(placeAddress: String) = PlaceDao.getSavedPlace(placeAddress)
 

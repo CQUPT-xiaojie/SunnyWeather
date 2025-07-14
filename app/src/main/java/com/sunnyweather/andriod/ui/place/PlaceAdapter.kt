@@ -55,7 +55,6 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
                 val place = placeList[position]
                 if (!fragment.viewModel.isPlaceSaved(place.address)) {
                     fragment.viewModel.savePlace(place.address, place)
-
                 }
                 else Toast.makeText(parent.context, "请勿重复添加", Toast.LENGTH_SHORT)
                     .show()
@@ -81,10 +80,11 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
             val position = holder.bindingAdapterPosition
             if (position != RecyclerView.NO_POSITION) {
                 val place = placeList[position]
-                fragment.viewModel.setHome(place)
-                // 将已有的address指定为home，就可以把同一个的address保存的数据删除，避免重复展示
-                fragment.viewModel.removePlace(place.address)
-                Toast.makeText(parent.context, "已设置home为：${place.address}", Toast.LENGTH_SHORT)
+                fragment.viewModel.setHome(place.name)
+                if (!fragment.viewModel.isPlaceSaved(place.address)) {
+                    fragment.viewModel.savePlace(place.address, place)
+                }
+                else Toast.makeText(parent.context, "已设置为Home", Toast.LENGTH_SHORT)
                     .show()
             }
         }

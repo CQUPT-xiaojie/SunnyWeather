@@ -19,10 +19,15 @@ object PlaceDao {
         }
     }
 
-    fun setHome(place: Place) {
-        sharedPreferences().edit {
-            putString("home", Gson().toJson(place))
+    fun setHome(placeAddress: String) {
+        sharedPreferences().edit() {
+            putString("home", placeAddress)
         }
+    }
+
+    fun getHome(): String?  {
+        val address = sharedPreferences().getString("home", "")
+        return address
     }
 
     fun getSavedPlace(placeAddress: String): Place {
@@ -32,7 +37,7 @@ object PlaceDao {
 
     fun clearPlace() {
         val allEntries= sharedPreferences().all
-        if (allEntries.size == 1) {
+        if (allEntries.size == 2) {
             sharedPreferences().edit() {
                 clear()
             }
@@ -46,6 +51,7 @@ object PlaceDao {
 
     fun loadAllPlace(): List<Place> = sharedPreferences().all
         .filterValues { it is String }
+        .filter { (key, _) -> key != "home" }
         .map { (_, jsonString) ->
             Gson().fromJson(jsonString as String, Place::class.java) }
 }
