@@ -1,6 +1,7 @@
 package com.sunnyweather.andriod.ui.weather
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,12 +23,22 @@ import com.sunnyweather.andriod.R
 import com.sunnyweather.andriod.logic.model.Weather
 import com.sunnyweather.andriod.logic.model.getSky
 import com.sunnyweather.andriod.ui.place.PlaceFragment
+import com.sunnyweather.andriod.ui.place.PlaceViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.net.NetworkCapabilities
 
 class WeatherActivity : AppCompatActivity() {
 
     val viewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
+
+    val placeViewModel by lazy {
+        val placeFragment = supportFragmentManager.findFragmentById(R.id.placeFragment)
+                as PlaceFragment
+        placeFragment.let {
+            ViewModelProvider(it).get(PlaceViewModel::class.java)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,12 +65,24 @@ class WeatherActivity : AppCompatActivity() {
         val swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
         // 对weatherLiveData进行观察
         viewModel.weatherLiveData.observe(this, Observer { result ->
-            val weather = result.getOrNull()
-            if (weather != null) {
+            if (!isNetworkConnected(this)) {
+                val weather: Weather = viewModel.getSavedWeather(viewModel.placeName)
                 showWeatherInfo(weather)
             } else {
-                Toast.makeText(this, "无法成功获取天气", Toast.LENGTH_SHORT).show()
-                result.exceptionOrNull()?.printStackTrace()
+                val weather = result.getOrNull()
+                if (weather != null) {
+                    showWeatherInfo(weather)
+                    //  要是查询的天气是属于常用列表中，则进行保存
+                    Thread {
+                        val savedPlaceNameList = placeViewModel.loadAllPlace().map { it -> it.name }
+                        if(savedPlaceNameList.contains(viewModel.placeName)) {
+                            viewModel.saveWeather(viewModel.placeName, weather)
+                        }
+                    }.start()
+                } else {
+                    Toast.makeText(this, "无法成功获取天气", Toast.LENGTH_SHORT).show()
+                    result.exceptionOrNull()?.printStackTrace()
+                }
             }
             swipeRefresh.isRefreshing = false
         })
@@ -77,7 +100,16 @@ class WeatherActivity : AppCompatActivity() {
 
         //设置swipRefresh下滑属性设置回调：
         swipeRefresh.setOnRefreshListener {
-            refreshWeather()
+            if (!isNetworkConnected(this)) {
+                Toast.makeText(this, "请连接网络！", Toast.LENGTH_SHORT).show()
+                swipeRefresh.isRefreshing = false
+            } else refreshWeather()
+        }
+
+        if (!isNetworkConnected(this)) {
+            val weather: Weather = viewModel.getSavedWeather(viewModel.placeName)
+            showWeatherInfo(weather)
+            return
         }
 
         // 创建页面进行数据设置后，直接进行刷新
@@ -127,6 +159,18 @@ class WeatherActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.ultravioletText).text = lifeIndex.ultraviolet[0].desc
         findViewById<TextView>(R.id.carWashingText).text = lifeIndex.carWashing[0].desc
         findViewById<ScrollView>(R.id.weatherLayout).visibility = View.VISIBLE
+    }
+
+    private fun isNetworkConnected(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        return when {
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
+        }
     }
 }
 

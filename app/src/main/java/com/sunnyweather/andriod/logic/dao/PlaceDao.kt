@@ -7,19 +7,45 @@ import com.sunnyweather.andriod.SunnyWeatherApplication
 import com.sunnyweather.andriod.logic.model.Place
 
 object PlaceDao {
-    fun savePlace(place: Place) {
+    fun savePlace(placeAddress: String, place: Place) {
         sharedPreferences().edit {
-            putString("place", Gson().toJson(place))
+            putString(placeAddress, Gson().toJson(place))
         }
     }
 
-    fun getSavedPlace(): Place {
-        val placeJson = sharedPreferences().getString("place", "")
+    fun removePlace(placeAddress: String) {
+        sharedPreferences().edit() {
+            remove(placeAddress)
+        }
+    }
+
+    fun setHome(place: Place) {
+        sharedPreferences().edit {
+            putString("home", Gson().toJson(place))
+        }
+    }
+
+    fun getSavedPlace(placeAddress: String): Place {
+        val placeJson = sharedPreferences().getString(placeAddress, "")
         return Gson().fromJson(placeJson, Place::class.java)
     }
 
-    fun isPlaceSaved() = sharedPreferences().contains("place")
+    fun clearPlace() {
+        val allEntries= sharedPreferences().all
+        if (allEntries.size == 1) {
+            sharedPreferences().edit() {
+                clear()
+            }
+        }
+    }
 
-    private fun sharedPreferences() =
-        SunnyWeatherApplication.context.getSharedPreferences("sunny_weather", Context.MODE_PRIVATE)
+    fun isPlaceSaved(placeAddress: String) = sharedPreferences().contains(placeAddress)
+
+    private fun sharedPreferences() = SunnyWeatherApplication
+        .context.getSharedPreferences("sunny_weather_place", Context.MODE_PRIVATE)
+
+    fun loadAllPlace(): List<Place> = sharedPreferences().all
+        .filterValues { it is String }
+        .map { (_, jsonString) ->
+            Gson().fromJson(jsonString as String, Place::class.java) }
 }

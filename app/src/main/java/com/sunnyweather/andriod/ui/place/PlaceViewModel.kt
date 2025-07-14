@@ -1,5 +1,8 @@
 package com.sunnyweather.andriod.ui.place
 
+import android.location.Address
+import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
@@ -17,9 +20,26 @@ class PlaceViewModel: ViewModel() {
         searchLiveData.value = query
     }
 
-    fun savePlace(place: Place) = Repository.savePlace(place)
+    private val _frequentPlaceListLiveData = MutableLiveData<ArrayList<Place>>()
 
-    fun getSavedPlace() = Repository.getSavedPlace()
+    val frequentPlaceListLiveData: LiveData<ArrayList<Place>>
+        get() = _frequentPlaceListLiveData
 
-    fun isPlaceSaved() = Repository.isPlaceSaved()
+    fun savePlace(placeAddress: String, place: Place) = Repository.savePlace(placeAddress, place)
+
+    fun removePlace(placeAddress: String) = Repository.removePlace(placeAddress)
+
+    fun clearPlace() = Repository.clearPlace()
+
+    fun setHome(place: Place) = Repository.setHome(place)
+
+    fun getSavedPlace(placeAddress: String) = Repository.getSavedPlace(placeAddress)
+
+    fun isPlaceSaved(placeAddress: String) = Repository.isPlaceSaved(placeAddress)
+
+    fun loadAllPlace() = Repository.loadAllPlace()
+
+    fun refreshList() {
+        _frequentPlaceListLiveData.value = ArrayList(loadAllPlace())
+    }
 }

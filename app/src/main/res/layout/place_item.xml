@@ -26,10 +26,35 @@
             android:textSize="14sp"/>
     </LinearLayout>
 
-    <ImageButton
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:src="@drawable/ic_add_place"
-        android:layout_gravity="end|center_vertical" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom">
+
+        <ImageButton
+            android:id="@+id/setHome"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_home" />
+
+        <ImageButton
+            android:id="@+id/savePlace"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_add_place"
+            android:layout_marginStart="10dp" />
+
+        <ImageButton
+            android:id="@+id/removePlace"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_remove_place"
+            android:layout_marginStart="10dp"/>
+
+
+    </LinearLayout>
+
+
+
 
 </com.google.android.material.card.MaterialCardView>

@@ -35,7 +35,6 @@ class PlaceFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super .onViewCreated(view, savedInstanceState)
 
-
         // 这里第一次是没有记录的 主界面会加载Fragment，但是一旦有place记录，就会出现无限调用的情况：
         // 这里有记录直接拉起WeatherActivity，但是WeatherActivity会静态布局加载PlaceFragment
         //PlaceFragment被创建了会重复拉起WeatherActivity
@@ -53,8 +52,8 @@ class PlaceFragment: Fragment() {
 //                return
 //            }
 //        }
-        if(activity is MainActivity && viewModel.isPlaceSaved()) {
-            val place = viewModel.getSavedPlace()
+        if(activity is MainActivity && viewModel.isPlaceSaved("home")) {
+            val place = viewModel.getSavedPlace("home")
             val intent = Intent(context, WeatherActivity::class.java).apply {
                 putExtra("location_lng", place.location.lng)
                 putExtra("location_lat", place.location.lat)
@@ -65,6 +64,14 @@ class PlaceFragment: Fragment() {
             return
         }
 
+        // 常用已收藏的城市列表展示
+        val frequentPlace = view.findViewById<RecyclerView>(R.id.frequentPlace)
+        val frequentPlaceLayoutManager = LinearLayoutManager(activity)
+        frequentPlace.layoutManager = frequentPlaceLayoutManager
+        viewModel.refreshList()
+        // PlaceFragment中
+        val placeListAdapter = PlaceAdapter(this, viewModel.frequentPlaceListLiveData.value)
+        frequentPlace.adapter = placeListAdapter
 
         val layoutManager = LinearLayoutManager(activity)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
@@ -77,15 +84,17 @@ class PlaceFragment: Fragment() {
                 viewModel.searchPlaces(content)
             } else {
                 recyclerView.visibility = View.GONE
+                frequentPlace.visibility = View.VISIBLE
                 view.findViewById<ImageView>(R.id.bgImageView).visibility = View.VISIBLE
                 viewModel.placeList.clear()
                 adapter.notifyDataSetChanged()
             }
         }
-        viewModel.placeLiveData.observe(viewLifecycleOwner, Observer { result ->
+        viewModel.placeLiveData.observe(viewLifecycleOwner, { result ->
             val places = result.getOrNull()
             if (places != null) {
                 recyclerView.visibility = View.VISIBLE
+                frequentPlace.visibility = View.GONE
                 view.findViewById<ImageView>(R.id.bgImageView).visibility = View.GONE
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)

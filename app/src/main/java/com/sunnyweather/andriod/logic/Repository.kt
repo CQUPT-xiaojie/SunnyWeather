@@ -2,6 +2,7 @@ package com.sunnyweather.andriod.logic
 
 import androidx.lifecycle.liveData
 import com.sunnyweather.andriod.logic.dao.PlaceDao
+import com.sunnyweather.andriod.logic.dao.WeatherDao
 import com.sunnyweather.andriod.logic.model.Place
 import com.sunnyweather.andriod.logic.model.Weather
 import com.sunnyweather.andriod.logic.network.SunnyWeatherNetwork
@@ -71,9 +72,23 @@ object Repository {
             emit(result)
         }
 
-    fun savePlace(place: Place) = PlaceDao.savePlace(place)
+    fun savePlace(placeAddress:String, place: Place) = PlaceDao.savePlace(placeAddress ,place)
 
-    fun getSavedPlace() = PlaceDao.getSavedPlace()
+    fun removePlace(placeAddress: String) = PlaceDao.removePlace(placeAddress)
 
-    fun isPlaceSaved() = PlaceDao.isPlaceSaved()
+    fun clearPlace() = PlaceDao.clearPlace()
+
+    fun setHome(place: Place) = PlaceDao.setHome(place)
+
+    fun getSavedPlace(placeAddress: String) = PlaceDao.getSavedPlace(placeAddress)
+
+    fun isPlaceSaved(placeAddress: String) = PlaceDao.isPlaceSaved(placeAddress)
+
+    fun loadAllPlace() = PlaceDao.loadAllPlace()
+
+    fun saveWeather(placeName: String, weather: Weather) =
+        WeatherDao.saveWeather(placeName, weather)
+
+    fun getSavedWeather(placeName: String) =
+        WeatherDao.getSavedWeather(placeName)
 }

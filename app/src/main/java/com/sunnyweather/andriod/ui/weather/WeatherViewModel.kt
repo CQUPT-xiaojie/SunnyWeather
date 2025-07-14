@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import com.sunnyweather.andriod.logic.Repository
 import com.sunnyweather.andriod.logic.model.Location
+import com.sunnyweather.andriod.logic.model.Weather
 
 class WeatherViewModel: ViewModel() {
     private val locationLiveData = MutableLiveData<Location>()
@@ -20,4 +21,10 @@ class WeatherViewModel: ViewModel() {
     fun refreshWeather(lng: String, lat: String) {
         locationLiveData.value = Location(lng, lat)
     }
+
+    fun saveWeather(placeName: String, weather: Weather) =
+        Repository.saveWeather(placeName, weather)
+
+    fun getSavedWeather(placeName: String) =
+        Repository.getSavedWeather(placeName)
 }
